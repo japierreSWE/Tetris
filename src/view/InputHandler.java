@@ -13,6 +13,7 @@ public class InputHandler {
     // Timestamps representing when the user has pressed the left/right keys
     // and when the tetronimo has moved.
     private Long leftKeyTimestamp, rightKeyTimestamp, movedTimestamp = null;
+    private Long rotatedTimestamp = null;
 
     public InputHandler(Model model) {
         this.model = model;
@@ -36,6 +37,8 @@ public class InputHandler {
             leftKeyTimestamp = null;
         } else if(keyCode.equals("RIGHT")) {
             rightKeyTimestamp = null;
+        } else if(keyCode.equals("UP")) {
+            rotatedTimestamp = null;
         }
 
         keysPressed.remove(keyCode);
@@ -55,6 +58,11 @@ public class InputHandler {
                 (movedTimestamp == null || currentTime - movedTimestamp >= MOVE_SPEED)) {
             model.moveTetronimoHorizontal(1);
             movedTimestamp = currentTime;
+        }
+
+        if(keysPressed.contains("UP") && rotatedTimestamp == null) {
+            model.rotateCurrentTetronimo();
+            rotatedTimestamp = currentTime;
         }
 
         if(keysPressed.contains("DOWN")) {

@@ -3,10 +3,7 @@ package model;
 import javafx.scene.paint.Color;
 import javafx.util.Pair;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
+import java.util.*;
 
 public class Model {
     public final static int NUM_COLUMNS = 10;
@@ -53,25 +50,25 @@ public class Model {
         for(Tetrominos tEnum : Tetrominos.values()) {
             switch(tEnum) {
                 case I:
-                    nextTetrominos.push(new ITetronimo());
+                    nextTetrominos.push(new ITetronimo(this));
                     break;
                 case J:
-                    nextTetrominos.push(new JTetronimo());
+                    nextTetrominos.push(new JTetronimo(this));
                     break;
                 case L:
-                    nextTetrominos.push(new LTetromino());
+                    nextTetrominos.push(new LTetromino(this));
                     break;
                 case O:
-                    nextTetrominos.push(new OTetronimo());
+                    nextTetrominos.push(new OTetronimo(this));
                     break;
                 case S:
-                    nextTetrominos.push(new STetromino());
+                    nextTetrominos.push(new STetromino(this));
                     break;
                 case T:
-                    nextTetrominos.push(new TTetromino());
+                    nextTetrominos.push(new TTetromino(this));
                     break;
                 case Z:
-                    nextTetrominos.push(new ZTetronimo());
+                    nextTetrominos.push(new ZTetronimo(this));
                     break;
             }
         }
@@ -88,6 +85,28 @@ public class Model {
         for(Pair<Integer,Integer> block : blocks) {
             grid[block.getKey()][block.getValue()] = t.getColor();
         }
+        grid[t.getCenterBlock().getKey()][t.getCenterBlock().getValue()] = t.getColor();
+    }
+
+    private void removeTetronimo(Tetronimo t) {
+        ArrayList<Pair<Integer,Integer>> blocks = t.getBlockCoords();
+
+        for(Pair<Integer,Integer> block : blocks) {
+            grid[block.getKey()][block.getValue()] = null;
+        }
+        grid[t.getCenterBlock().getKey()][t.getCenterBlock().getValue()] = null;
+    }
+
+    /**
+     * Returns true if the block is in an illegal position
+     * (that is, already occupied by another block or out of bounds)
+     */
+    private boolean blockIsIllegal(Pair<Integer, Integer> block) {
+        return block.getValue() < 0
+                || block.getValue() >= NUM_COLUMNS
+                || block.getKey() < 0
+                || block.getKey() >= NUM_ROWS
+                || grid[block.getKey()][block.getValue()] != null;
     }
 
     /**
@@ -98,11 +117,14 @@ public class Model {
      */
     private boolean moveTetronimo(int rOffset, int cOffset) {
         ArrayList<Pair<Integer,Integer>> currentBlocks = currentTetronimo.getBlockCoords();
+        Pair<Integer, Integer> currentCenterBlock = currentTetronimo.getCenterBlock();
         ArrayList<Pair<Integer,Integer>> newBlocks = new ArrayList<>();
+        Pair<Integer, Integer> newCenterBlock = new Pair<>(currentCenterBlock.getKey() + rOffset, currentCenterBlock.getValue() + cOffset);
         boolean result = false;
 
+        removeTetronimo(currentTetronimo);
+
         for(Pair<Integer,Integer> block : currentBlocks) {
-            grid[block.getKey()][block.getValue()] = null;
             newBlocks.add(new Pair<>(block.getKey() + rOffset, block.getValue() + cOffset));
         }
 
@@ -110,18 +132,17 @@ public class Model {
         for(Pair<Integer, Integer> block : newBlocks) {
             // Don't move the tetronimo if it will be out of bounds
             // or into an already existing block.
-            if(block.getValue() < 0
-                    || block.getValue() >= NUM_COLUMNS
-                    || block.getKey() < 0
-                    || block.getKey() >= NUM_ROWS
-                    || grid[block.getKey()][block.getValue()] != null) {
+            if(blockIsIllegal(block)) {
                 allBlocksLegal = false;
                 break;
             }
         }
+        if(blockIsIllegal(newCenterBlock)) {
+            allBlocksLegal = false;
+        }
 
         if(allBlocksLegal) {
-            currentTetronimo.setBlockCoords(newBlocks);
+            currentTetronimo.setBlockCoords(newBlocks, newCenterBlock);
             result = true;
         }
         addTetronimo(currentTetronimo);
@@ -151,6 +172,30 @@ public class Model {
             currentTetronimo = nextTetrominos.pop();
             addTetronimo(currentTetronimo);
         }
+    }
+
+    /**
+     * Rotates the current tetronimo if it is
+     * legal to do so.
+     */
+    public void rotateCurrentTetronimo() {
+        removeTetronimo(currentTetronimo);
+        List<Pair<Integer, Integer>> rotatedCoords = currentTetronimo.rotatedCoords();
+        boolean allBlocksLegal = true;
+
+        for(Pair<Integer, Integer> block : rotatedCoords) {
+            if(blockIsIllegal(block)) {
+                allBlocksLegal = false;
+                break;
+            }
+        }
+
+        if(allBlocksLegal) {
+            ArrayList<Pair<Integer, Integer>> newCoords = new ArrayList<>(rotatedCoords);
+            // The center block doesn't move during rotation.
+            currentTetronimo.setBlockCoords(newCoords, currentTetronimo.getCenterBlock());
+        }
+        addTetronimo(currentTetronimo);
     }
 
     public Color[][] getGrid() {

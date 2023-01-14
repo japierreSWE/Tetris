@@ -94,7 +94,7 @@ public class Model {
     public void dropTetronimo() {
         boolean dropped = moveTetronimo(1, 0);
         if(!dropped) {
-            currentTetronimo = new TTetromino();
+            currentTetronimo = new JTetronimo();
             addTetronimo(currentTetronimo);
         }
     }

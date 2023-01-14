@@ -5,6 +5,8 @@ import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
 
 public class Model {
     public final static int NUM_COLUMNS = 10;
@@ -17,6 +19,18 @@ public class Model {
     private long normalDropTime;
     private long currentDropTime;
 
+    private LinkedList<Tetronimo> nextTetrominos;
+
+    enum Tetrominos {
+        I,
+        J,
+        L,
+        O,
+        S,
+        T,
+        Z
+    }
+
     public Model() {
         grid = new Color[NUM_ROWS + 2][NUM_COLUMNS];
         for(Color[] row : grid) {
@@ -24,16 +38,51 @@ public class Model {
         }
 
         currentDropTime = normalDropTime = 1000;
+        nextTetrominos = new LinkedList<>();
+        populateNextTetrominos();
 
-        currentTetronimo = new OTetronimo();
+        currentTetronimo = nextTetrominos.pop();
         addTetronimo(currentTetronimo);
+    }
+
+    /**
+     * Populates nextTetronimos with a random permutation
+     * of the 7 tetronimos,
+     */
+    private void populateNextTetrominos() {
+        for(Tetrominos tEnum : Tetrominos.values()) {
+            switch(tEnum) {
+                case I:
+                    nextTetrominos.push(new ITetronimo());
+                    break;
+                case J:
+                    nextTetrominos.push(new JTetronimo());
+                    break;
+                case L:
+                    nextTetrominos.push(new LTetromino());
+                    break;
+                case O:
+                    nextTetrominos.push(new OTetronimo());
+                    break;
+                case S:
+                    nextTetrominos.push(new STetromino());
+                    break;
+                case T:
+                    nextTetrominos.push(new TTetromino());
+                    break;
+                case Z:
+                    nextTetrominos.push(new ZTetronimo());
+                    break;
+            }
+        }
+        Collections.shuffle(nextTetrominos);
     }
 
     /**
      * Adds a tetronimo to the grid.
      * @param t The tetronimo to add to the grid.
      */
-    void addTetronimo(Tetronimo t) {
+    private void addTetronimo(Tetronimo t) {
         ArrayList<Pair<Integer,Integer>> blocks = t.getBlockCoords();
 
         for(Pair<Integer,Integer> block : blocks) {
@@ -94,7 +143,12 @@ public class Model {
     public void dropTetronimo() {
         boolean dropped = moveTetronimo(1, 0);
         if(!dropped) {
-            currentTetronimo = new ZTetronimo();
+
+            if(nextTetrominos.isEmpty()) {
+                populateNextTetrominos();
+            }
+
+            currentTetronimo = nextTetrominos.pop();
             addTetronimo(currentTetronimo);
         }
     }

@@ -29,7 +29,7 @@ public class Model {
     }
 
     public Model() {
-        grid = new Color[NUM_ROWS + 2][NUM_COLUMNS];
+        grid = new Color[NUM_ROWS][NUM_COLUMNS];
         for(Color[] row : grid) {
             Arrays.fill(row, null);
         }
@@ -150,6 +150,63 @@ public class Model {
     }
 
     /**
+     * Returns true if the row with the given index
+     * is filled with blocks.
+     */
+    private boolean isFullRow(int rowIndex) {
+        for(int i = 0; i<NUM_COLUMNS; i++) {
+            if(grid[rowIndex][i] == null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Compacts the grid by removing null rows.
+     */
+    private void compactGrid(ArrayList<Integer> fullRows) {
+        int rowCursor = NUM_ROWS-1;
+        Color[][] newGrid = new Color[NUM_ROWS][NUM_COLUMNS];
+
+        for(int i = NUM_ROWS-1; i>=0; i--) {
+            if(!fullRows.contains(i)) {
+                newGrid[rowCursor] = grid[i];
+                --rowCursor;
+            }
+        }
+
+        while(rowCursor >= 0) {
+            Arrays.fill(newGrid[rowCursor], null);
+            --rowCursor;
+        }
+        grid = newGrid;
+    }
+
+    /**
+     * Clears all rows of the grid that are filled with blocks
+     * after the current tetronimo has been placed.
+     */
+    private void clearRows() {
+        ArrayList<Integer> fullRows = new ArrayList<>();
+
+        for(Pair<Integer, Integer> block : currentTetronimo.getBlockCoords()) {
+            int rowIndex = block.getKey();
+
+            if(isFullRow(rowIndex)) {
+                fullRows.add(rowIndex);
+            }
+        }
+        if(isFullRow(currentTetronimo.getCenterBlock().getKey())) {
+            fullRows.add(currentTetronimo.getCenterBlock().getKey());
+        }
+
+        if(!fullRows.isEmpty()) {
+            compactGrid(fullRows);
+        }
+    }
+
+    /**
      * Moves the current tetronimo horizontally, according
      * to a given offset.
      * @param offset
@@ -164,7 +221,7 @@ public class Model {
     public void dropTetronimo() {
         boolean dropped = moveTetronimo(1, 0);
         if(!dropped) {
-
+            clearRows();
             if(nextTetrominos.isEmpty()) {
                 populateNextTetrominos();
             }

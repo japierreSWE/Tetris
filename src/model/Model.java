@@ -16,6 +16,8 @@ public class Model {
     private long normalDropTime;
     private long currentDropTime;
 
+    private boolean hasLost;
+
     private LinkedList<Tetronimo> nextTetrominos;
 
     enum Tetrominos {
@@ -35,6 +37,7 @@ public class Model {
         }
 
         currentDropTime = normalDropTime = 1000;
+        hasLost = false;
         nextTetrominos = new LinkedList<>();
         populateNextTetrominos();
 
@@ -206,6 +209,10 @@ public class Model {
         }
     }
 
+    private void lose() {
+        hasLost = true;
+    }
+
     /**
      * Moves the current tetronimo horizontally, according
      * to a given offset.
@@ -227,7 +234,19 @@ public class Model {
             }
 
             currentTetronimo = nextTetrominos.pop();
-            addTetronimo(currentTetronimo);
+            boolean hasLost = false;
+
+            for(Pair<Integer, Integer> block : currentTetronimo.getBlockCoords()) {
+                if(blockIsIllegal(block)) {
+                    hasLost = true;
+                }
+            }
+
+            if(hasLost) {
+                lose();
+            } else {
+                addTetronimo(currentTetronimo);
+            }
         }
     }
 
@@ -255,6 +274,21 @@ public class Model {
         addTetronimo(currentTetronimo);
     }
 
+    public void reset() {
+        grid = new Color[NUM_ROWS][NUM_COLUMNS];
+        for(Color[] row : grid) {
+            Arrays.fill(row, null);
+        }
+
+        currentDropTime = normalDropTime = 1000;
+        hasLost = false;
+        nextTetrominos = new LinkedList<>();
+        populateNextTetrominos();
+
+        currentTetronimo = nextTetrominos.pop();
+        addTetronimo(currentTetronimo);
+    }
+
     public Color[][] getGrid() {
         return grid;
     }
@@ -269,5 +303,9 @@ public class Model {
 
     public void setCurrentDropTime(long currentDropTime) {
         this.currentDropTime = currentDropTime;
+    }
+
+    public boolean hasLost() {
+        return hasLost;
     }
 }

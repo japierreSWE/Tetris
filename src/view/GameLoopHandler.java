@@ -5,6 +5,7 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import model.Model;
 
 import java.util.HashSet;
@@ -51,6 +52,16 @@ public class GameLoopHandler extends AnimationTimer {
         }
     }
 
+    private void drawGameOver(GraphicsContext gc) {
+        gc.setFill(Color.WHITE);
+        gc.setStroke(Color.BLACK);
+        gc.setFont(Font.font("Arial", 35));
+        gc.fillText("Game Over", canvas.getWidth()/2 - 100, canvas.getHeight()/2);
+        gc.fillText("Press R to restart", canvas.getWidth()/2 - 140, canvas.getHeight()/2 + 40);
+        gc.strokeText("Game Over", canvas.getWidth()/2 - 100, canvas.getHeight()/2);
+        gc.strokeText("Press R to restart", canvas.getWidth()/2 - 140, canvas.getHeight()/2 + 40);
+    }
+
     public void addKeyPress(String keyCode) {
         inputHandler.addKeyPress(keyCode);
     }
@@ -68,7 +79,7 @@ public class GameLoopHandler extends AnimationTimer {
             lastDropTimestamp = System.currentTimeMillis();
         }
 
-        if(currentTime - lastDropTimestamp >= model.getCurrentDropTime()) {
+        if(currentTime - lastDropTimestamp >= model.getCurrentDropTime() && !model.hasLost()) {
             model.dropTetronimo();
             lastDropTimestamp = currentTime;
         }
@@ -76,5 +87,9 @@ public class GameLoopHandler extends AnimationTimer {
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.clearRect(0,0,canvas.getWidth(),canvas.getHeight());
         drawGrid(gc);
+
+        if(model.hasLost()) {
+            drawGameOver(gc);
+        }
     }
 }

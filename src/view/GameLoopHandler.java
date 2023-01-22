@@ -15,11 +15,12 @@ public class GameLoopHandler extends AnimationTimer {
     private Model model;
     private InputHandler inputHandler;
     private Long lastDropTimestamp = null;
+    private Long timeSinceDrop = null;
 
     public GameLoopHandler(Canvas canvas, Model model) {
         this.canvas = canvas;
         this.model = model;
-        inputHandler = new InputHandler(model);
+        inputHandler = new InputHandler(model, this);
     }
 
     private void drawGrid(GraphicsContext gc) {
@@ -62,6 +63,26 @@ public class GameLoopHandler extends AnimationTimer {
         gc.strokeText("Press R to restart", canvas.getWidth()/2 - 140, canvas.getHeight()/2 + 40);
     }
 
+    private void drawPauseScreen(GraphicsContext gc) {
+        gc.setFill(Color.WHITE);
+        gc.setStroke(Color.BLACK);
+        gc.setFont(Font.font("Arial", 35));
+        gc.fillText("Paused", canvas.getWidth()/2 - 60, canvas.getHeight()/2);
+        gc.fillText("Press P to unpause", canvas.getWidth()/2 - 140, canvas.getHeight()/2 + 40);
+        gc.strokeText("Paused", canvas.getWidth()/2 - 60, canvas.getHeight()/2);
+        gc.strokeText("Press P to unpause", canvas.getWidth()/2 - 140, canvas.getHeight()/2 + 40);
+
+    }
+
+    public void togglePause() {
+        if(timeSinceDrop == null) {
+            timeSinceDrop = System.currentTimeMillis() - lastDropTimestamp;
+        } else {
+            lastDropTimestamp = System.currentTimeMillis() - timeSinceDrop;
+            timeSinceDrop = null;
+        }
+    }
+
     public void addKeyPress(String keyCode) {
         inputHandler.addKeyPress(keyCode);
     }
@@ -79,7 +100,7 @@ public class GameLoopHandler extends AnimationTimer {
             lastDropTimestamp = System.currentTimeMillis();
         }
 
-        if(currentTime - lastDropTimestamp >= model.getCurrentDropTime() && !model.hasLost()) {
+        if(currentTime - lastDropTimestamp >= model.getCurrentDropTime() && model.isActive()) {
             model.dropTetronimo();
             lastDropTimestamp = currentTime;
         }
@@ -87,6 +108,10 @@ public class GameLoopHandler extends AnimationTimer {
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.clearRect(0,0,canvas.getWidth(),canvas.getHeight());
         drawGrid(gc);
+
+        if(model.isPaused()) {
+            drawPauseScreen(gc);
+        }
 
         if(model.hasLost()) {
             drawGameOver(gc);

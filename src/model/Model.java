@@ -17,6 +17,7 @@ public class Model {
     private long currentDropTime;
 
     private boolean hasLost;
+    private boolean paused;
 
     private LinkedList<Tetronimo> nextTetrominos;
 
@@ -38,6 +39,7 @@ public class Model {
 
         currentDropTime = normalDropTime = 1000;
         hasLost = false;
+        paused = false;
         nextTetrominos = new LinkedList<>();
         populateNextTetrominos();
 
@@ -307,5 +309,17 @@ public class Model {
 
     public boolean hasLost() {
         return hasLost;
+    }
+
+    public boolean isPaused() {
+        return paused;
+    }
+
+    public boolean isActive() {
+        return !paused && !hasLost;
+    }
+
+    public void togglePause() {
+        paused = !paused;
     }
 }

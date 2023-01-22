@@ -7,6 +7,7 @@ import java.util.HashSet;
 public class InputHandler {
 
     private Model model;
+    private GameLoopHandler glh;
     private HashSet<String> keysPressed;
     private final int MOVE_SPEED = 500;
 
@@ -14,9 +15,11 @@ public class InputHandler {
     // and when the tetronimo has moved.
     private Long leftKeyTimestamp, rightKeyTimestamp, movedTimestamp = null;
     private Long rotatedTimestamp = null;
+    boolean pauseButtonDown = false;
 
-    public InputHandler(Model model) {
+    public InputHandler(Model model, GameLoopHandler glh) {
         this.model = model;
+        this.glh = glh;
         keysPressed = new HashSet<String>();
     }
 
@@ -29,6 +32,10 @@ public class InputHandler {
             movedTimestamp = null;
         } else if(keyCode.equals("R") && model.hasLost()) {
             model.reset();
+        } else if(keyCode.equals("P") && !pauseButtonDown) {
+            model.togglePause();
+            glh.togglePause();
+            pauseButtonDown = true;
         }
 
         keysPressed.add(keyCode);
@@ -41,6 +48,8 @@ public class InputHandler {
             rightKeyTimestamp = null;
         } else if(keyCode.equals("UP")) {
             rotatedTimestamp = null;
+        } else if(keyCode.equals("P")) {
+            pauseButtonDown = false;
         }
 
         keysPressed.remove(keyCode);
@@ -49,7 +58,7 @@ public class InputHandler {
     public void handleInput(long now) {
         long currentTime = System.currentTimeMillis();
 
-        if(!model.hasLost()) {
+        if(model.isActive()) {
             // The tetronimo must not move if both keys are being pressed
             if(keysPressed.contains("LEFT") && !keysPressed.contains("RIGHT") &&
                     (movedTimestamp == null || currentTime - movedTimestamp >= MOVE_SPEED)) {

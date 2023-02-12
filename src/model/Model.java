@@ -2,6 +2,7 @@ package model;
 
 import javafx.scene.paint.Color;
 import javafx.util.Pair;
+import javafx_controller.GameLoopController;
 
 import java.util.*;
 
@@ -21,6 +22,11 @@ public class Model {
 
     private LinkedList<Tetronimo> nextTetrominos;
 
+    private int level;
+    private int progress;
+
+    private GameLoopController controller;
+
     enum Tetrominos {
         I,
         J,
@@ -31,13 +37,16 @@ public class Model {
         Z
     }
 
-    public Model() {
+    public Model(GameLoopController controller) {
         grid = new Color[NUM_ROWS][NUM_COLUMNS];
         for(Color[] row : grid) {
             Arrays.fill(row, null);
         }
 
         currentDropTime = normalDropTime = 1000;
+        level = 1;
+        progress = 0;
+        this.controller = controller;
         hasLost = false;
         paused = false;
         nextTetrominos = new LinkedList<>();
@@ -45,6 +54,7 @@ public class Model {
 
         currentTetronimo = nextTetrominos.pop();
         addTetronimo(currentTetronimo);
+        controller.setLevel(level);
     }
 
     /**
@@ -188,6 +198,22 @@ public class Model {
         grid = newGrid;
     }
 
+    private int calculateDropTime() {
+        return (int)Math.round(1000.0 * (Math.pow(0.793, level)));
+    }
+
+    private void increaseLevel(int amountToLevel) {
+        progress += amountToLevel;
+
+        while(progress >= 10) {
+            progress -= 10;
+            ++level;
+            int newDropTime = calculateDropTime();
+            setNormalDropTime(newDropTime);
+        }
+        controller.setLevel(level);
+    }
+
     /**
      * Clears all rows of the grid that are filled with blocks
      * after the current tetronimo has been placed.
@@ -208,11 +234,16 @@ public class Model {
 
         if(!fullRows.isEmpty()) {
             compactGrid(fullRows);
+            increaseLevel(fullRows.size());
         }
     }
 
     private void lose() {
         hasLost = true;
+    }
+
+    private void setNormalDropTime(int dropTime) {
+        this.normalDropTime = dropTime;
     }
 
     /**

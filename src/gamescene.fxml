@@ -17,6 +17,7 @@
       <VBox alignment="TOP_CENTER" prefHeight="660.0" prefWidth="184.0" spacing="10.0">
          <children>
             <Label text="Level:" />
+            <Label fx:id="levelLabel" />
             <Label text="Score:" />
          </children>
       </VBox>

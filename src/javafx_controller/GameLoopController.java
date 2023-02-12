@@ -13,6 +13,7 @@ public class GameLoopController {
     private Model model;
     public Canvas canvas = null;
     public Label levelLabel = null;
+    public Label scoreLabel = null;
 
     @FXML
     void initialize() {
@@ -32,5 +33,9 @@ public class GameLoopController {
 
     public void setLevel(int level) {
         levelLabel.setText(String.valueOf(level));
+    }
+
+    public void setScore(int score) {
+        scoreLabel.setText(String.valueOf(score));
     }
 }

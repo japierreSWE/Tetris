@@ -24,6 +24,7 @@ public class Model {
 
     private int level;
     private int progress;
+    private int score;
 
     private GameLoopController controller;
 
@@ -38,6 +39,11 @@ public class Model {
     }
 
     public Model(GameLoopController controller) {
+        this.controller = controller;
+        initialize();
+    }
+
+    private void initialize() {
         grid = new Color[NUM_ROWS][NUM_COLUMNS];
         for(Color[] row : grid) {
             Arrays.fill(row, null);
@@ -46,7 +52,7 @@ public class Model {
         currentDropTime = normalDropTime = 1000;
         level = 1;
         progress = 0;
-        this.controller = controller;
+        score = 0;
         hasLost = false;
         paused = false;
         nextTetrominos = new LinkedList<>();
@@ -55,6 +61,7 @@ public class Model {
         currentTetronimo = nextTetrominos.pop();
         addTetronimo(currentTetronimo);
         controller.setLevel(level);
+        controller.setScore(score);
     }
 
     /**
@@ -180,7 +187,7 @@ public class Model {
     /**
      * Compacts the grid by removing null rows.
      */
-    private void compactGrid(ArrayList<Integer> fullRows) {
+    private void compactGrid(HashSet<Integer> fullRows) {
         int rowCursor = NUM_ROWS-1;
         Color[][] newGrid = new Color[NUM_ROWS][NUM_COLUMNS];
 
@@ -214,12 +221,17 @@ public class Model {
         controller.setLevel(level);
     }
 
+    private void increaseScore(int scoreToAdd) {
+        score += scoreToAdd;
+        controller.setScore(score);
+    }
+
     /**
      * Clears all rows of the grid that are filled with blocks
      * after the current tetronimo has been placed.
      */
     private void clearRows() {
-        ArrayList<Integer> fullRows = new ArrayList<>();
+        HashSet<Integer> fullRows = new HashSet<>();
 
         for(Pair<Integer, Integer> block : currentTetronimo.getBlockCoords()) {
             int rowIndex = block.getKey();
@@ -235,6 +247,7 @@ public class Model {
         if(!fullRows.isEmpty()) {
             compactGrid(fullRows);
             increaseLevel(fullRows.size());
+            increaseScore(fullRows.size() * 100);
         }
     }
 
@@ -308,18 +321,7 @@ public class Model {
     }
 
     public void reset() {
-        grid = new Color[NUM_ROWS][NUM_COLUMNS];
-        for(Color[] row : grid) {
-            Arrays.fill(row, null);
-        }
-
-        currentDropTime = normalDropTime = 1000;
-        hasLost = false;
-        nextTetrominos = new LinkedList<>();
-        populateNextTetrominos();
-
-        currentTetronimo = nextTetrominos.pop();
-        addTetronimo(currentTetronimo);
+        initialize();
     }
 
     public Color[][] getGrid() {

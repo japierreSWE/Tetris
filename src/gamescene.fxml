@@ -19,6 +19,7 @@
             <Label text="Level:" />
             <Label fx:id="levelLabel" />
             <Label text="Score:" />
+            <Label fx:id="scoreLabel" />
          </children>
       </VBox>
    </children>

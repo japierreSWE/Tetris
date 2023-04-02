@@ -5,6 +5,7 @@ import javafx.util.Pair;
 import javafx_controller.GameLoopController;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Model {
     public final static int NUM_COLUMNS = 10;
@@ -318,6 +319,47 @@ public class Model {
             currentTetronimo.setBlockCoords(newCoords, currentTetronimo.getCenterBlock());
         }
         addTetronimo(currentTetronimo);
+    }
+
+    private boolean isCurrentTetronimoBlock(int r, int c) {
+        for(Pair<Integer,Integer> block : currentTetronimo.getBlockCoords()) {
+            if(r == block.getKey() && c == block.getValue()) {
+                return true;
+            }
+        }
+        return r == currentTetronimo.getCenterBlock().getKey() && c == currentTetronimo.getCenterBlock().getValue();
+    }
+
+    private boolean ghostBlocksAreLegal(List<Pair<Integer,Integer>> ghostBlocks) {
+        for(Pair<Integer, Integer> ghostBlock : ghostBlocks) {
+            int r = ghostBlock.getKey();
+            int c = ghostBlock.getValue();
+
+            if(!(r >= 0 && r < NUM_ROWS &&
+                    c >= 0 && c < NUM_COLUMNS)) {
+                return false;
+            }
+
+            if(grid[r][c] != null &&
+                    !isCurrentTetronimoBlock(r,c)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public List<Pair<Integer,Integer>> getGhostBlocks() {
+        List<Pair<Integer,Integer>> result = new ArrayList<>(currentTetronimo.getBlockCoords());
+        result.add(currentTetronimo.getCenterBlock());
+        List<Pair<Integer,Integer>> newResult = new ArrayList<>(result);
+
+        while(ghostBlocksAreLegal(newResult)) {
+            result = newResult;
+            newResult = result.stream()
+                    .map(block -> new Pair<>(block.getKey() + 1, block.getValue()))
+                    .collect(Collectors.toList());
+        }
+        return result;
     }
 
     public void reset() {

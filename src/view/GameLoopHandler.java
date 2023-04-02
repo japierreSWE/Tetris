@@ -1,14 +1,18 @@
 package view;
 
+import com.sun.corba.se.impl.orbutil.graph.Graph;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.util.Pair;
 import model.Model;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 public class GameLoopHandler extends AnimationTimer {
     private Canvas canvas;
@@ -28,6 +32,9 @@ public class GameLoopHandler extends AnimationTimer {
         double rowOffset = canvas.getHeight() / Model.NUM_VISIBLE_ROWS;
         Color[][] grid = model.getGrid();
 
+        drawGhostBlocks(gc);
+
+        //Draw blocks.
         for(int r = 2; r<Model.NUM_ROWS; r++) {
             for(int c = 0; c<Model.NUM_COLUMNS; c++) {
                 if(grid[r][c] != null) {
@@ -50,6 +57,22 @@ public class GameLoopHandler extends AnimationTimer {
         for(int i = 0; i<Model.NUM_VISIBLE_ROWS + 1; i++) {
             double rowY = i * rowOffset;
             gc.strokeLine(0, rowY, canvas.getWidth(), rowY);
+        }
+    }
+
+    private void drawGhostBlocks(GraphicsContext gc) {
+        List<Pair<Integer,Integer>> ghostBlocks = model.getGhostBlocks();
+        double columnOffset = canvas.getWidth() / Model.NUM_COLUMNS;
+        double rowOffset = canvas.getHeight() / Model.NUM_VISIBLE_ROWS;
+
+        for(Pair<Integer,Integer> block : ghostBlocks) {
+            int rowIndex = block.getKey();
+            int columnIndex = block.getValue();
+            double rowY = (rowIndex-2) * rowOffset;
+            double columnX = columnIndex * columnOffset;
+
+            gc.setFill(Color.LIGHTGREY);
+            gc.fillRect(columnX, rowY, columnOffset, rowOffset);
         }
     }
 

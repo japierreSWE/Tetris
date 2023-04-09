@@ -18,13 +18,15 @@ public class GameLoopHandler extends AnimationTimer {
     private Canvas canvas;
     private Model model;
     private InputHandler inputHandler;
+    private NextPieceDisplayer nextPieceDisplayer;
     private Long lastDropTimestamp = null;
     private Long timeSinceDrop = null;
 
-    public GameLoopHandler(Canvas canvas, Model model) {
+    public GameLoopHandler(Canvas canvas, Model model, Canvas nextPieceCanvas) {
         this.canvas = canvas;
         this.model = model;
         inputHandler = new InputHandler(model, this);
+        nextPieceDisplayer = new NextPieceDisplayer(this.model, nextPieceCanvas);
     }
 
     private void drawGrid(GraphicsContext gc) {
@@ -117,6 +119,7 @@ public class GameLoopHandler extends AnimationTimer {
     @Override
     public void handle(long now) {
         inputHandler.handleInput(now);
+        nextPieceDisplayer.displayNextPiece();
 
         long currentTime = System.currentTimeMillis();
         if(lastDropTimestamp == null) {

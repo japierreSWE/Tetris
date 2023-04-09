@@ -15,4 +15,9 @@ public class LTetromino extends Tetronimo {
         blockCoords.add(new Pair<>(3,5));
         blockCoords.add(new Pair<>(3,3));
     }
+
+    @Override
+    public Tetrominos getType() {
+        return Tetrominos.L;
+    }
 }

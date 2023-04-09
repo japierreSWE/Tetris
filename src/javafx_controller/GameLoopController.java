@@ -12,13 +12,14 @@ public class GameLoopController {
     private GameLoopHandler handler;
     private Model model;
     public Canvas canvas = null;
+    public Canvas nextPieceCanvas = null;
     public Label levelLabel = null;
     public Label scoreLabel = null;
 
     @FXML
     void initialize() {
         model = new Model(this);
-        handler = new GameLoopHandler(canvas, model);
+        handler = new GameLoopHandler(canvas, model, nextPieceCanvas);
         handler.start();
     }
 

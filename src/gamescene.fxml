@@ -20,6 +20,12 @@
             <Label fx:id="levelLabel" />
             <Label text="Score:" />
             <Label fx:id="scoreLabel" />
+            <Label text="Next Piece:" />
+            <VBox prefHeight="100" prefWidth="50" style="-fx-border-color: black;" >
+               <children>
+                  <Canvas fx:id="nextPieceCanvas" height="100" width="100" style="-fx-border-color: black;" />
+               </children>
+            </VBox>
          </children>
       </VBox>
    </children>

@@ -50,4 +50,16 @@ public abstract class Tetronimo {
             return new Pair<>(block.getValue() + centerBlock.getKey(), (-block.getKey()) + centerBlock.getValue());
         }).collect(Collectors.toList());
     }
+
+    public enum Tetrominos {
+        I,
+        J,
+        L,
+        O,
+        S,
+        T,
+        Z
+    }
+
+    public abstract Tetrominos getType();
 }

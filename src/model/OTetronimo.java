@@ -22,4 +22,9 @@ public class OTetronimo extends Tetronimo {
     public List<Pair<Integer, Integer>> rotatedCoords() {
         return this.blockCoords;
     }
+
+    @Override
+    public Tetrominos getType() {
+        return Tetrominos.O;
+    }
 }

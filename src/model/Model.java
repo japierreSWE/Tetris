@@ -29,16 +29,6 @@ public class Model {
 
     private GameLoopController controller;
 
-    enum Tetrominos {
-        I,
-        J,
-        L,
-        O,
-        S,
-        T,
-        Z
-    }
-
     public Model(GameLoopController controller) {
         this.controller = controller;
         initialize();
@@ -70,7 +60,7 @@ public class Model {
      * of the 7 tetronimos,
      */
     private void populateNextTetrominos() {
-        for(Tetrominos tEnum : Tetrominos.values()) {
+        for(Tetronimo.Tetrominos tEnum : Tetronimo.Tetrominos.values()) {
             switch(tEnum) {
                 case I:
                     nextTetrominos.push(new ITetronimo(this));
@@ -319,6 +309,13 @@ public class Model {
             currentTetronimo.setBlockCoords(newCoords, currentTetronimo.getCenterBlock());
         }
         addTetronimo(currentTetronimo);
+    }
+
+    public Tetronimo getNextPiece() {
+        if(nextTetrominos.isEmpty()) {
+            populateNextTetrominos();
+        }
+        return nextTetrominos.peek();
     }
 
     private boolean isCurrentTetronimoBlock(int r, int c) {
